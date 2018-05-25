@@ -12,13 +12,13 @@ if [[ $? != 0 ]]; then
 
     tmux new-window -n extra -t $name
     # cause why not?
-    tmux send-keys -t $name 'figlet -f smslant.flf How u doin sweet cheeks?' C-m
+    tmux send-keys -t $name 'clear' C-m 'figlet -f smslant.flf How u doin sweet cheeks?' C-m
 
     # 2 window switches so 'vim' is the last-window
     tmux select-window -t ${name}:2
     tmux select-window -t ${name}:1
 
-    tmux send-keys -t $name 'git branch' C-m
+    tmux send-keys -t $name 'clear' C-m 'git branch' C-m
     tmux send-keys -t $name 'git status' C-m
     tmux select-pane -U
 fi
