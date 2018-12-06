@@ -20,7 +20,7 @@ if [[ $? != 0 ]]; then
 
     tmux send-keys -t $NAME 'clear' C-m 'git branch' C-m
     tmux send-keys -t $NAME 'git status' C-m
-    tmux ``elect-pane -U
+    tmux select-pane -U
 fi
 
 tmux attach -t $NAME
