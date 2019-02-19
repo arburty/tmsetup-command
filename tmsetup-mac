@@ -3,6 +3,7 @@
 # either give the session a name as the only argument or workspace is used
 declare -r NAME=${1:-"workspace"}
 
+# if the session doesn't exist create it. otherwise attach to it
 tmux has-session -t $NAME 2>/dev/null
 if [[ $? != 0 ]]; then
     tmux new -s ${NAME} -n workstation -d
@@ -12,14 +13,20 @@ if [[ $? != 0 ]]; then
 
     tmux new-window -n extra -t $NAME
     # cause why not?
-    tmux send-keys -t $NAME 'clear' C-m 'figlet -f smslant.flf How u doin sweet cheeks?' C-m
+    tmux send-keys -t $NAME 'clear && figlet -f smslant.flf How u doin sweet cheeks?' C-m
+
+    # open ranger in last window
+    # ranger is not a default command.  Not portable
+    tmux new-window -n ranger -t $NAME
+    tmux send-keys -t $NAME 'ranger' C-m
 
     # 2 window switches so 'vim' is the last-window
+    # if windows start at index 0 these need to be decremented by 1
     tmux select-window -t ${NAME}:2
     tmux select-window -t ${NAME}:1
 
-    #tmux send-keys -t $NAME 'clear' C-m
-    tmux send-keys -t $NAME 'clear && git status -s 2>/dev/null && git branch 2>/dev/null' C-m
+    # run git status and branch to see current working state with no output if not in a git directory
+    tmux send-keys -t $NAME 'clear &&  git status -s 2>/dev/null && git branch 2>/dev/null' C-m
     tmux select-pane -L
 fi
 
