@@ -15,6 +15,11 @@ if [[ $? != 0 ]]; then
     # cause why not?
     tmux send-keys -t $NAME 'clear && figlet -f smslant.flf How u doin sweet cheeks?' C-m
 
+    # open ranger in last window
+    # ranger is not a default command.  Not portable
+    tmux new-window -n ranger -t $NAME
+    tmux send-keys -t $NAME 'ranger' C-m
+
     # 2 window switches so 'vim' is the last-window
     # if windows start at index 0 these need to be decremented by 1
     tmux select-window -t ${NAME}:2
