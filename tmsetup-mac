@@ -13,7 +13,7 @@ if [[ $? != 0 ]]; then
 
     tmux new-window -n extra -t $NAME
     # cause why not?
-    tmux send-keys -t $NAME 'clear && figlet -f smslant.flf How u doin sweet cheeks?' C-m
+    #tmux send-keys -t $NAME 'clear && figlet -f smslant.flf How u doin sweet cheeks?' C-m
 
     # open ranger in last window
     # ranger is not a default command.  Not portable
@@ -26,7 +26,9 @@ if [[ $? != 0 ]]; then
     tmux select-window -t ${NAME}:1
 
     # run git status and branch to see current working state with no output if not in a git directory
+    sleep 1
     tmux send-keys -t $NAME 'clear &&  git status -s 2>/dev/null && git branch 2>/dev/null' C-m
+    #tmux send-keys -t $NAME 'git ssb 2>/dev/null' C-m
     tmux select-pane -L
 fi
 
