@@ -1,5 +1,11 @@
 #! /bin/bash
 
+detach=false
+if [[ $1 == "-d" ]]; then
+    detach=true
+    shift
+fi
+
 # either give the session a name as the only argument or workspace is used
 declare -r NAME=${1:-"workspace"}
 
@@ -27,10 +33,13 @@ if [[ $? != 0 ]]; then
 
     # run git status and branch to see current working state with no output if not in a git directory
     sleep 1
-    tmux send-keys -t $NAME 'clear &&  git status -s 2>/dev/null && git branch 2>/dev/null' C-m
-    #tmux send-keys -t $NAME 'git ssb 2>/dev/null' C-m
+    #tmux send-keys -t $NAME 'clear &&  git status -s 2>/dev/null && git branch 2>/dev/null' C-m
+    tmux send-keys -t $NAME 'git ssb 2>/dev/null' C-m
     tmux select-pane -L
 fi
 
+[[ $detach == true ]] && echo "tmux session '$NAME' created" && exit 0
+
 tmux attach -t $NAME
+
 exit 0
