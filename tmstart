@@ -1,0 +1,65 @@
+#! /bin/bash
+
+# Author: Austin Burt
+# Email: austin@burt.us.com
+# Date: 3/27/19
+
+declare -r PROGRAM=$(basename $0)
+startDir=$(PWD)
+
+die() {
+    echo "ERROR: $PROGRAM: Line $BASH_LINENO: $*" >&2
+    exit 1
+}
+
+USAGE() {
+    echo -e "  $PROGRAM [ -d -w --help] SessionName Path"
+    echo -e "SUMMARY:"
+    echo "Each SessionName Path pair creates a new tmux session using"
+    echo "tmsetup. The first pair is the session that is attached to."
+    echo "FLAGS:"
+    echo "-d      Must be first, does not attach to a session"
+    echo "-w      Is the 'SessionName Path' pair of 'workspace ~/'"
+    echo "--help  Must be first. Displays the Usage"
+    exit 0
+}
+
+isFlagW() {
+    name=$1
+    if [[ $name == "-w" ]]; then
+        name="workspace"
+        path="$HOME"
+        shift
+        return 0
+    fi
+    return 1
+}
+
+detach=false
+[[ $1 == "-d" ]] && detach=true && shift
+[[ $1 == "--help" ]] && USAGE
+
+# it its less than 2 args and its not '-w' then exit
+[[ $# -ge 2 ]] || isFlagW $1 || die "invalid arguments"
+
+isFlagW $1
+primary=$name
+
+while [[ $# -gt 0 ]]
+do
+    name=$1
+    path=$2
+    isFlagW $name || shift && shift
+    [[ -d $path ]] || die "'$path' is not a directory"
+
+    tmux has-session -t $name 2>/dev/null
+    if [[ $? != 0 ]]; then
+        cd $path
+        tmsetup -d $name
+        cd - >> /dev/null
+    fi
+done
+
+[[ $detach == false ]] && sleep 1 && tmux attach -t $primary
+
+exit 0
