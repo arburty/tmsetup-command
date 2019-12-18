@@ -1,0 +1,57 @@
+#! /bin/bash
+
+# Author: Austin Burt
+# Email: austin@burt.us.com
+# Date: 4/5/19
+
+declare -r PROGRAM=$(basename $0)
+
+die() {
+    echo "ERROR: $PROGRAM: Line $BASH_LINENO: $*" >&2
+    exit 1
+}
+
+mySession() {
+    name=$(tmux list-sessions | grep attached | cut -d ":" -f 1)
+    echo $name
+}
+
+killSession() {
+    tmux kill-session -t $1
+}
+
+if [[ $# -eq 1 ]]
+then
+    name=$1
+    [[ $name == "-a" || $name == "-s" ]] || tmux has-session -t $name || die "Not a valid tmux session"
+else
+    name=$(mySession)
+fi
+
+
+if [[ $name == "-a" ]]
+then
+    die "wow thats wrong"
+    mine=$(mySession)
+    sessions=$(tmux list-sessions | grep -v "$mine"| cut -d ":" -f 1)
+
+    while read currSession
+    do
+        name=$currSession
+        echo "killing $name"
+        sleep 1
+        killSession $name
+    done < <(echo "$sessions")
+
+    name=$mine
+    echo "killing $name"
+    sleep 2
+    killSession $name
+elif [[ $1 == "-s" ]]
+then
+    echo -s
+else
+    killSession $name
+fi
+
+exit 0
