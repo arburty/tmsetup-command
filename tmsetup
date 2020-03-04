@@ -1,5 +1,11 @@
 #! /bin/bash
 
+# tmsetup
+# Author: Austin Burt
+# Email: austin@burt.us.com
+# github: github.com/arburty/tmsetup-commnand
+# Date: 3/27/19
+
 detach=false
 if [[ $1 == "-d" ]]; then
     detach=true
@@ -18,8 +24,6 @@ if [[ $? != 0 ]]; then
     tmux new-window -n vim -t $NAME
 
     tmux new-window -n extra -t $NAME
-    # cause why not?
-    #tmux send-keys -t $NAME 'clear && figlet -f smslant.flf How u doin sweet cheeks?' C-m
 
     # open ranger in last window
     # ranger is not a default command.  Not portable
@@ -32,14 +36,21 @@ if [[ $? != 0 ]]; then
     tmux select-window -t ${NAME}:1
 
     # run git status and branch to see current working state with no output if not in a git directory
+    # the commented out line is the more portable equivalent
     sleep 1
-    #tmux send-keys -t $NAME 'clear &&  git status -s 2>/dev/null && git branch 2>/dev/null' C-m
-    tmux send-keys -t $NAME 'git ssb 2>/dev/null' C-m
+    # tmux send-keys -t $NAME 'clear &&  git status -s 2>/dev/null && git branch 2>/dev/null' C-m
+
+    # This part is not portable, the above should be used ('welcome' is in the github.com/dotfiles-and-scripts)
+    tmux send-keys -t $NAME 'welcome' C-m # a welcome screen I created to show weather, git stuff, and my todo's
+    sleep 0.5
+    tmux send-keys -t $NAME 'M'
     tmux select-pane -L
 fi
 
+# only create the session, do not attach to it
 [[ $detach == true ]] && echo "tmux session '$NAME' created" && exit 0
 
+# Attach to this new session
 tmux attach -t $NAME
 
 exit 0

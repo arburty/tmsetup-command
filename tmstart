@@ -1,11 +1,13 @@
 #! /bin/bash
 
+# tmstart
 # Author: Austin Burt
 # Email: austin@burt.us.com
+# github: github.com/arburty/tmsetup-commnand
 # Date: 3/27/19
 
 declare -r PROGRAM=$(basename $0)
-startDir=$(PWD)
+startDir=$(pwd)
 
 die() {
     echo "ERROR: $PROGRAM: Line $BASH_LINENO: $*" >&2
@@ -35,6 +37,7 @@ isFlagW() {
     return 1
 }
 
+# Main
 detach=false
 [[ $1 == "-d" ]] && detach=true && shift
 [[ $1 == "--help" ]] && USAGE

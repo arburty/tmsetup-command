@@ -1,8 +1,10 @@
 #! /bin/bash
 
+# tmclose
 # Author: Austin Burt
 # Email: austin@burt.us.com
 # Date: 4/5/19
+# github: github.com/arburty/tmsetup-commnand
 
 declare -r PROGRAM=$(basename $0)
 
