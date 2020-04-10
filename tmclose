@@ -21,19 +21,26 @@ isValidSession() {
 }
 
 killSession() {
-    isValidSession $1 && echo "Killing: $name" && tmux kill-session -t $1
+    isValidSession $1 && echo "Killing: $1" && tmux kill-session -t $1
+}
+
+getOtherSessions(){
+    tmux list-sessions -F '#S' | grep -v "$mine"
+}
+
+getAllSessions() {
+    echo "$(getOtherSessions) $(mySession)"
 }
 
 kill_others() {
-    otherSessions=$( tmux list-sessions -F '#S' | grep -v "$mine" )
-
     # kill all other sessions that are not mine
+    otherSessions=$(getOtherSessions)
     while read currSession
     do
         name=$currSession
         sleep 0.5
         killSession $name
-    done < <(echo "$otherSessions")
+    done < <( echo "$otherSessions" )
 }
 
 kill_mine() {
@@ -56,13 +63,29 @@ kill_list() {
     done
 }
 
+select_sessions() {
+    PS3="What sessions(s) do you want to delete? "
+    select closeSession in $(echo "$(getAllSessions) --all --others --done")
+    do
+        case $closeSession in
+            --all    ) kill_all ; break ;;
+            --others ) kill_others ; break ;;
+            --done   ) break ;;
+            *        ) killSession $closeSession ;;
+        esac
+    done
+}
+
 # Main {
+# TODO: Add method to pick sessions interactively
+
 mine=$(mySession)
 [[ $# -eq 0 ]] && kill_mine
 case $1 in
-    -o ) kill_others    ;;
-    -a ) kill_all       ;;
-    *  ) kill_list "$@" ;;
+    -o ) kill_others     ;;
+    -a ) kill_all        ;;
+    -s ) select_sessions ;;
+    *  ) kill_list "$@"  ;;
 esac # {
 
 exit 0

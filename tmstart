@@ -86,7 +86,7 @@ do
 done # }
 
 # attach to primary session
-[[ $detach == false ]] && sleep 1 && tmux attach -t $primary
+[[ $detach == false ]] && sleep 0.5 && tmux attach -t $primary
 
 # }
 

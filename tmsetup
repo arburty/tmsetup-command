@@ -51,7 +51,7 @@ if [[ $? != 0 ]]; then
     # github.com/arburty/dotfiles-and-scripts/bin)
     tmux send-keys -t $NAME 'welcome' C-m
     # attmept to make welcom full screen
-    sleep 1.5
+    [[ $detach == "true" ]] || sleep 1.5
     tmux send-keys -t $NAME 'M'
 
     # move to left pane to start the session
