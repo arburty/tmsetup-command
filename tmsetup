@@ -7,10 +7,7 @@
 # Date: 3/27/19
 
 detach=false
-if [[ $1 == "-d" ]]; then
-    detach=true
-    shift
-fi
+[[ $1 == "-d" ]] && detach=true && shift
 
 # either give the session a name as the only argument or workspace is used
 declare -r NAME=${1:-"workspace"}
@@ -18,15 +15,18 @@ declare -r NAME=${1:-"workspace"}
 # if the session doesn't exist create it. otherwise attach to it
 tmux has-session -t $NAME 2>/dev/null
 if [[ $? != 0 ]]; then
+    # new session with NAME and a 'workstation' window split in 2 panes
     tmux new -s ${NAME} -n workstation -d
     tmux split-window -h -t $NAME
 
+    # new window named 'vim'
     tmux new-window -n vim -t $NAME
 
+    # new window named 'extra'
     tmux new-window -n extra -t $NAME
 
     # open ranger in last window
-    # ranger is not a default command.  Not portable
+    # ranger is not a built in command.  Not portable
     tmux new-window -n ranger -t $NAME
     tmux send-keys -t $NAME 'ranger' C-m
 
@@ -35,22 +35,30 @@ if [[ $? != 0 ]]; then
     tmux select-window -t ${NAME}:2
     tmux select-window -t ${NAME}:1
 
-    # run git status and branch to see current working state with no output if not in a git directory
-    # the commented out line is the more portable equivalent
+    # run git status and branch to see current working state with no output if
+    # not in a git directory the commented out line is the more portable
+    # equivalent
     sleep 1
-    # tmux send-keys -t $NAME 'clear &&  git status -s 2>/dev/null && git branch 2>/dev/null' C-m
+    # tmux send-keys -t $NAME \
+    # 'clear &&  git status -s 2>/dev/null && git branch 2>/dev/null' C-m
 
-    # This part is not portable, the above should be used ('welcome' is in the github.com/dotfiles-and-scripts)
-    tmux send-keys -t $NAME 'welcome' C-m # a welcome screen I created to show weather, git stuff, and my todo's
-    sleep 0.5
+    # if the workspace session, change pane to dotfiles-and-scripts directory
+    [[ $NAME == 'workspace' ]] && tmux send-keys -t $NAME \
+        'clear && cd ~/git/dotfiles-and-scripts/' C-m
+
+    # a welcome screen I created to show weather, git stuff, and my todo's This
+    # part is not portable, the above should be used ('welcome' is in
+    # github.com/arburty/dotfiles-and-scripts/bin)
+    tmux send-keys -t $NAME 'welcome' C-m
+    # attmept to make welcom full screen
+    sleep 1.5
     tmux send-keys -t $NAME 'M'
+
+    # move to left pane to start the session
     tmux select-pane -L
 fi
 
-# only create the session, do not attach to it
-[[ $detach == true ]] && echo "tmux session '$NAME' created" && exit 0
-
-# Attach to this new session
-tmux attach -t $NAME
+# Only create the session if detach is true, do not attach to it. Otherwise attach
+[[ $detach == "true" ]] && echo "tmux session '$NAME' created" || tmux attach -t $NAME
 
 exit 0

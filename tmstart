@@ -15,54 +15,79 @@ die() {
 }
 
 USAGE() {
-    echo -e "  $PROGRAM [ -d -w --help] SessionName Path"
+    echo "USAGE:"
+    echo -e "  $PROGRAM [ -d -h --help] {-w | {-s | SessionName} Path}"
     echo -e "SUMMARY:"
     echo "Each SessionName Path pair creates a new tmux session using"
     echo "tmsetup. The first pair is the session that is attached to."
     echo "FLAGS:"
-    echo "-d      Must be first, does not attach to a session"
-    echo "-w      Is the 'SessionName Path' pair of 'workspace ~/'"
-    echo "--help  Must be first. Displays the Usage"
+    echo "-d:      Must be first, does not attach to a session"
+    echo "-w:      Is the 'SessionName Path' pair of 'workspace ~/'"
+    echo "-s:      can replace a SessionName to represent the basename of Path"
+    echo "          -s path/to/dir"
+    echo "-h:"
+    echo "--help:  Must be first. Displays the Usage"
     exit 0
 }
 
 isFlagW() {
-    name=$1
-    if [[ $name == "-w" ]]; then
-        name="workspace"
-        path="$HOME"
-        shift
-        return 0
-    fi
-    return 1
+    [[ $1 == "-w" ]] && return 0 || return 1
 }
 
-# Main
+nameSameAsDir() {
+    # returns the given name, or basename of the following path if
+    # name passed in is '-s'
+    [[ $1 == "-s" ]] && echo $(basename $2) || echo $1
+}
+
+setNameAndPath() {
+    name=$1
+    path=$2
+    # change name if -w flag
+    isFlagW $name && name='workspace' && path=$HOME
+    # if name is -s, it is the same name as the directory
+    name=$(nameSameAsDir $name $path)
+}
+
+createSession() {
+    tmux has-session -t $name 2>/dev/null
+    [[ $? -eq 0 ]] && echo "$name is already a session" && return 1
+
+    # create tmux session with tmsetup without attaching
+    cd $path
+    tmsetup -d $name
+    cd - >> /dev/null
+}
+
+# Main {
 detach=false
-[[ $1 == "-d" ]] && detach=true && shift
-[[ $1 == "--help" ]] && USAGE
+case $1 in
+    -d ) detach=true && shift ;;
+    --help | -h )  USAGE ;;
+esac
 
 # it its less than 2 args and its not '-w' then exit
 [[ $# -ge 2 ]] || isFlagW $1 || die "invalid arguments"
 
-isFlagW $1
-primary=$name
+# The first session is the 'primary' session and the one to attach to
+# -w becomes 'workspace' and -s returns basename of following path
+isFlagW $1 && primary='workspace' || primary=$(nameSameAsDir $1 $2)
 
-while [[ $# -gt 0 ]]
+while [[ $# -gt 0 ]] # {
 do
-    name=$1
-    path=$2
-    isFlagW $name || shift && shift
+    setNameAndPath $1 $2
+    # shift once always, shift twice if it is a name dir pair
+    isFlagW $1 || shift; shift
+
+    # check path is a valid directory
     [[ -d $path ]] || die "'$path' is not a directory"
 
-    tmux has-session -t $name 2>/dev/null
-    if [[ $? != 0 ]]; then
-        cd $path
-        tmsetup -d $name
-        cd - >> /dev/null
-    fi
-done
+    createSession
+done # }
 
+# attach to primary session
 [[ $detach == false ]] && sleep 1 && tmux attach -t $primary
+
+# }
 
 exit 0
