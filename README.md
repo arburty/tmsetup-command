@@ -1,37 +1,130 @@
 # tmsetup-command
 
-A command to set up a new tmux session.  With an optional first argument the
-new session can be named, or the default 'workspace' will be used.  A
-pre-existing session of the same name will be attached to.
+Included here is a set of scripts, `tmsetup`, `tmstart`, and `tmclose`.  These work
+together to create and destroy multiple tmux sessions.
 
-*NOT PORTABLE* due to the use of the command 'welcome'.  This is a custom
-commnad I wrote to welcome me in a new session (really when I boot my home
-computer) and can be found at
+1. `tmsetup`: Used to set up a new custom tmux session.
+2. `tmstart`: Allows for multiple sessions to be created with `tmsetup`.
+3. `tmclose`: Can destroy multiple tmux sessions at once.
+
+# tmsetup
+
+Makes a tmux session in a way I found myself creating almost every time. With
+an optional first argument the new session can be named, or the default of
+'workspace' will be used.  A pre-existing session of the same name will be
+attached to.
+
+Not usually called on the command line, as `tmstart` is more user friendly because
+it can specify a directory to open all panes in, `tmsetup` uses the current working 
+directory to open the panes.
+
+By Window:
+
+1. (workspace) The first window will have two panes, the left will have the
+   cursor and be ready to go, the right pane displays the welcome command.
+2. (vim) This window is ready for vim.
+3. (extra) A window ready for your side tangents. (I commonly ssh and/or tail
+   log files from here)
+4. (ranger) Ranger, a file explorer with vi-like binding is opened.
+
+*NOT IMMEDIATELY PORTABLE* due to the use of the command `welcome` and the
+program `ranger`.  `welcome` is a custom command I wrote to welcome me in a new
+session (really when I boot my home computer) and can be found at
 [arburty/dotfiles-and-scripts][https://github.com/arburty/tmsetup-command] and
-can be removed or replaced with the commented line above it.
+can be removed or replaced with the commented line above it. Ranger can be
+replaced by another file explorer, different program, or simply removed and
+used as another window.
 
-`tmsetup [sessName]`
+`tmsetup [-d] [sessName]`
+
+The `-d` (detach) flag can be used to only create, and not attach to the session
 
 # tmstart
 
 tmstart takes in pairs of arguments following the pattern `name my/path/` and
-creates multiple sessions with tmsetup.  if the `-d` flag is passed first then
-no session will be attached to.  Otherwise the first pair passed will be
-attached.
+creates multiple sessions using `tmsetup`.
 
-`tmstart [-d] [sessName my/path/]... `
+`tmstart [ -d -h --help] {-w | {-s | SessionName} ./Path/}...`
 
-The `-w` flag opens a `workspace` in the home directory, and can be used in
-place of any name and path pair 
+## Flags
 
-`tmstart [-d] -w [sessName my/path/]...`
+### `-d` ) detach
 
-## tmclose
+If the `-d` flag is passed first then no session will be
+attached to.  Otherwise the first pair passed will be attached.
 
-In conjunction with this command I also use a command to close sessions called
-tmclose.
+`tmstart -d first ./firstpath/`
 
-This command allows the user to close the current attached session by simply
-using `'tmclose'` or select a seesion to close using `'tmclose sessName'` with
+`tmstart second ./secondpath/ third ./thirdpath/`
+
+The first example will open a session 'first' starting in the './firstpath/'
+directory and will not attach
+
+The second example will attach to the session 'second' starting in the
+'./secondpath/' directory and create 'third' in the './thirdpath/' directory
+
+### `-w` ) workspace
+
+The `-w` flag opens a `workspace` session in the home directory, and can be used in
+place of a name and path pair
+
+`tmstart -w sessName my/path/`
+
+This creates the 'workspace' session in the home directory and attaches to it.
+It also creates a session 'sessName' in the './my/path/' directory
+
+### `-s` ) same
+
+The `-s` flag can be used in place of a 'name' and will use the basename of the directory
+
+`tmstart [-d] -s my/path/`
+
+Resulting in a session named 'path' starting in './my/path/'
+
+### `-h`, `--help` )
+
+Prints the USAGE message.
+
+`tmstart -h`
+
+`tmstart --help`
+
+# tmclose
+
+In conjunction with these command I also use a command to close sessions called
+`tmclose`.
+
+This command allows the user to close the currently attached session by simply
+using `'tmclose'` or select many seesions to close using `'tmclose sessName...'` with
 sessName being the name of the session or just part of it.  Similar to using
 `tmux kill-session -t sessName`
+
+`tmclose`
+
+`tmclose one two three`
+
+First example closes your current session. The second example closes 3
+sessions, 'one', 'two', and 'three.'. Remember 'one' could represent a session
+called 'oneMoreEdit' as only part of the name is needed.
+
+## Flags
+
+### `-o` ) other
+
+Closes all 'other' sessions besides the one your are currently in.  Might not
+work if multiple sessions are "attached" to, like another terminal is open and
+in a different tmux session
+
+`tmclose -o`
+
+### `-a` ) all
+Closes 'all' sessions.  Closing the other sessions first, then the session you are in last.
+
+`tmclose -a`
+
+### `-s` ) select
+
+Opens a dialogue asking which sessions to remove, including options for all
+"\--all", all other sessions "\--other", or exit "\--done".
+
+`tmclose -s`
