@@ -127,6 +127,6 @@ Closes 'all' sessions.  Closing the other sessions first, then the session you a
 ### `-s` ) select
 
 Opens a dialogue asking which sessions to remove, including options for all
-"\--all", all other sessions "\--other", or exit "\--done".
+"\--all", all other sessions "\--others", or exit "\--done".
 
 `tmclose -s`

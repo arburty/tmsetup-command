@@ -8,7 +8,6 @@
 
 declare -r PROGRAM=$(basename $0)
 
-
 mySession() {
     name=$(tmux list-sessions | grep \(attached\)$ | cut -d ":" -f 1)
     echo $name
@@ -34,13 +33,10 @@ getAllSessions() {
 
 kill_others() {
     # kill all other sessions that are not mine
-    otherSessions=$(getOtherSessions)
     while read currSession
     do
-        name=$currSession
-        sleep 0.5
-        killSession $name
-    done < <( echo "$otherSessions" )
+        sleep 0.5 && killSession $currSession
+    done < <( echo "$(getOtherSessions)" )
 }
 
 kill_mine() {
@@ -77,8 +73,6 @@ select_sessions() {
 }
 
 # Main {
-# TODO: Add method to pick sessions interactively
-
 mine=$(mySession)
 [[ $# -eq 0 ]] && kill_mine
 case $1 in
@@ -86,6 +80,6 @@ case $1 in
     -a ) kill_all        ;;
     -s ) select_sessions ;;
     *  ) kill_list "$@"  ;;
-esac # {
+esac # }
 
 exit 0
