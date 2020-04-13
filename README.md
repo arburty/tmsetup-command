@@ -25,7 +25,7 @@ By Window:
 2. (vim) This window is ready for vim.
 3. (extra) A window ready for your side tangents. (I commonly ssh and/or tail
    log files from here)
-4. (ranger) Ranger, a file explorer with vi-like binding is opened.
+4. (ranger) Ranger, a file explorer with vi-like bindings is opened.
 
 *NOT IMMEDIATELY PORTABLE* due to the use of the command `welcome` and the
 program `ranger`.  `welcome` is a custom command I wrote to welcome me in a new
@@ -44,14 +44,14 @@ The `-d` (detach) flag can be used to only create, and not attach to the session
 tmstart takes in pairs of arguments following the pattern `name my/path/` and
 creates multiple sessions using `tmsetup`.
 
-`tmstart [ -d -h --help] {-w | {-s | SessionName} ./Path/}...`
+`tmstart [-d -h --help] {-w | {-s | SessionName} ./Path/}...`
 
 ## Flags
 
 ### `-d` ) detach
 
-If the `-d` flag is passed first then no session will be
-attached to.  Otherwise the first pair passed will be attached.
+If the `-d` flag is passed first then no session will be attached to.
+Otherwise the first pair passed will be used as the starting session.
 
 `tmstart -d first ./firstpath/`
 
@@ -65,8 +65,10 @@ The second example will attach to the session 'second' starting in the
 
 ### `-w` ) workspace
 
-The `-w` flag opens a `workspace` session in the home directory, and can be used in
-place of a name and path pair
+The `-w` flag opens a `workspace` session in the home directory, and can be
+used in place of a name and path pair.  Can only be used once but since I
+always want a generic session ready for tasks that are not project related it
+is a nice shorthand.
 
 `tmstart -w sessName my/path/`
 
