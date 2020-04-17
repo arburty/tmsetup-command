@@ -79,7 +79,7 @@ The `-p` flag will change the primary path to the next given session pair.
 Useful when a long list of sessions is given and you do not want the first pair
 to be the attached session. Makes no sense to use with `-d` but still works.
 
-`tmclose first first/ projectA projectAlpha/ -p projectB projectBeta/
+`tmclose first first/ projectA projectAlpha/ -p projectB projectBeta/`
 
 This will change the primary session to ProjectB, instead of using the
 defaulted 'first' session.
