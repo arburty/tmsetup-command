@@ -7,7 +7,6 @@
 # Date: 3/27/19
 
 declare -r PROGRAM=$(basename $0)
-startDir=$(pwd)
 
 die() {
     echo "ERROR: $PROGRAM: Line $BASH_LINENO: $*" >&2
@@ -16,13 +15,15 @@ die() {
 
 USAGE() {
     echo "USAGE:"
-    echo -e "  $PROGRAM [ -d -h --help] {-w | {-s | SessionName} Path}"
+    echo -e "  $PROGRAM [-h --help] {[-d -p] {-w | {-s | SessionName} ./Path/}}..."
     echo -e "SUMMARY:"
     echo "Each SessionName Path pair creates a new tmux session using"
-    echo "tmsetup. The first pair is the session that is attached to."
+    echo "tmsetup. The first pair is the session that is attached to"
+    echo "called the 'primary' session."
     echo "FLAGS:"
     echo "-d:      Must be first, does not attach to a session"
     echo "-w:      Is the 'SessionName Path' pair of 'workspace ~/'"
+    echo "-p:      sets the primary session to the next given SessionName"
     echo "-s:      can replace a SessionName to represent the basename of Path"
     echo "          -s path/to/dir"
     echo "-h:"
@@ -34,7 +35,15 @@ isFlagW() {
     [[ $1 == "-w" ]] && return 0 || return 1
 }
 
-nameSameAsDir() {
+isflagD(){
+    [[ $1 == "-d" ]] && detach=true && return 0 || return 1
+}
+
+isflagP(){
+    [[ $1 == "-p" ]] && return 0 || return 1
+}
+
+nameOrBasename() {
     # returns the given name, or basename of the following path if
     # name passed in is '-s'
     [[ $1 == "-s" ]] && echo $(basename $2) || echo $1
@@ -46,7 +55,7 @@ setNameAndPath() {
     # change name if -w flag
     isFlagW $name && name='workspace' && path=$HOME
     # if name is -s, it is the same name as the directory
-    name=$(nameSameAsDir $name $path)
+    name=$(nameOrBasename $name $path)
 }
 
 createSession() {
@@ -59,23 +68,39 @@ createSession() {
     cd - >> /dev/null
 }
 
+setPrimarySession() {
+    # args: $1=name and $2=path pair.
+    isFlagW $1 && primary='workspace' || primary=$(nameOrBasename $1 $2)
+}
+
 # Main {
-detach=false
-case $1 in
-    -d ) detach=true && shift ;;
-    --help | -h )  USAGE ;;
-esac
+# Checks {
+[[ $1 == "--help" ]] && USAGE
+[[ $1 == "-h" ]] && USAGE
 
 # it its less than 2 args and its not '-w' then exit
 [[ $# -ge 2 ]] || isFlagW $1 || die "invalid arguments"
 
-# The first session is the 'primary' session and the one to attach to
-# -w becomes 'workspace' and -s returns basename of following path
-isFlagW $1 && primary='workspace' || primary=$(nameSameAsDir $1 $2)
+detach=false
+isflagD $1 && shift
 
-while [[ $# -gt 0 ]] # {
+# The first session is the 'primary' session and the one to attach. Arguments
+# of "-w" become 'workspace' and a "-s" returns the basename of following path
+setPrimarySession $1 $2
+
+# }
+
+# Loop through all arguments and create sessions. {
+while [[ $# -gt 0 ]]
 do
+    # "-p" sets the primary session to the next name.
+    isflagP $1 && setPrimarySession $2 $3 && shift
+
+    # check for detach flag, exit if it is also last argument
+    isflagD $1 && shift && [[ $# -eq 0 ]] && break
+
     setNameAndPath $1 $2
+
     # shift once always, shift twice if it is a name dir pair
     isFlagW $1 || shift; shift
 
@@ -85,9 +110,10 @@ do
     createSession
 done # }
 
-# attach to primary session
+# Attach to primary session
 [[ $detach == false ]] && sleep 0.5 && tmux attach -t $primary
 
 # }
 
 exit 0
+# TODO: open a file param in vim window.

@@ -42,20 +42,27 @@ The `-d` (detach) flag can be used to only create, and not attach to the session
 # tmstart
 
 tmstart takes in pairs of arguments following the pattern `name my/path/` and
-creates multiple sessions using `tmsetup`.
+creates multiple sessions using `tmsetup`.  The first pair given will be the
+'primary' session and if no `-d` flag is passed will be the session that will
+be attached to once all the sessions have been created.
 
-`tmstart [-d -h --help] {-w | {-s | SessionName} ./Path/}...`
+`tmstart [-h --help] {[-d -p] {-w | {-s | SessionName} ./Path/}}...`
 
 ## Flags
 
 ### `-d` ) detach
 
-If the `-d` flag is passed first then no session will be attached to.
-Otherwise the first pair passed will be used as the starting session.
+If the `-d` flag is passed then no session will be attached to. Otherwise the
+first pair passed will be used as the default primary session, and the one the
+script will attach to.  (ex. tmux attatch -t primary)
 
-`tmstart -d first ./firstpath/`
+1. `tmstart -d first ./firstpath/`
 
-`tmstart second ./secondpath/ third ./thirdpath/`
+2. `tmstart second ./secondpath/ third ./thirdpath/`
+
+3. `tmstart second ./secondpath/ -d third ./thirdpath/`
+
+4. `tmstart second ./secondpath/ third ./thirdpath/ -d`
 
 The first example will open a session 'first' starting in the './firstpath/'
 directory and will not attach
@@ -63,11 +70,25 @@ directory and will not attach
 The second example will attach to the session 'second' starting in the
 './secondpath/' directory and create 'third' in the './thirdpath/' directory
 
+The third and fourth example are the same as example 2, but will not attach to
+a session.
+
+### `-p` ) primary
+
+The `-p` flag will change the primary path to the next given session pair.
+Useful when a long list of sessions is given and you do not want the first pair
+to be the attached session. Makes no sense to use with `-d` but still works.
+
+`tmclose first first/ projectA projectAlpha/ -p projectB projectBeta/
+
+This will change the primary session to ProjectB, instead of using the
+defaulted 'first' session.
+
 ### `-w` ) workspace
 
-The `-w` flag opens a `workspace` session in the home directory, and can be
-used in place of a name and path pair.  Can only be used once but since I
-always want a generic session ready for tasks that are not project related it
+The `-w` flag opens a `workspace` session in the users home directory, and can
+be used in place of a name and path pair.  Can only be used once but since A
+generic session ready for tasks that are not project related is very useful it
 is a nice shorthand.
 
 `tmstart -w sessName my/path/`
@@ -79,9 +100,10 @@ It also creates a session 'sessName' in the './my/path/' directory
 
 The `-s` flag can be used in place of a 'name' and will use the basename of the directory
 
-`tmstart [-d] -s my/path/`
+`tmstart -s my/very/longNameForAPath/`
 
-Resulting in a session named 'path' starting in './my/path/'
+Resulting in a session named 'longNameForAPath' starting in
+'./my/very/longNameForAPath/'
 
 ### `-h`, `--help` )
 
