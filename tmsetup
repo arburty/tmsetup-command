@@ -25,10 +25,20 @@ if [[ $? != 0 ]]; then
     # new window named 'extra'
     tmux new-window -n extra -t $NAME
 
-    # open ranger in last window
+    # open ranger in fourth window
     # ranger is not a built in command.  Not portable
     tmux new-window -n ranger -t $NAME
     tmux send-keys -t $NAME 'ranger' C-m
+
+    # open mutt in last window if the workspace
+    # mutt and friends are not a built in command.  Not portable
+    if [[ $NAME == 'workspace' ]]; then
+        tmux new-window -n mutt -t $NAME
+        tmux send-keys -t $NAME 'neomutt' C-m
+        # not setting the size with -l for some reason. resize-pane also didn't work
+        tmux split-window -d -v -l 5 -t $NAME 'while true;do mbsync -a;done'
+        tmux resize-pane -Z -t $NAME
+    fi
 
     # 2 window switches so 'vim' is the last-window
     # if windows start at index 0 these need to be decremented by 1

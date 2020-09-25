@@ -48,8 +48,8 @@ kill_mine() {
 }
 
 kill_all() {
-    kill_others
-    kill_mine
+    echo "Killing ALL sessions!"
+    tmux kill-server
 }
 
 kill_list() {
